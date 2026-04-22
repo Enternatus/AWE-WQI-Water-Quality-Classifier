@@ -38,15 +38,11 @@ Combines:
 
 **Weighting Strategy:**
 
-\[
-w_i = \frac{F1_i^2}{\sum_j F1_j^2}
-\]
+w_i = (F1_i^2) / (Σ F1_j^2)
 
 **Final Prediction:**
 
-\[
-\hat{y} = \arg\max \sum_i w_i \cdot P_i(y|x)
-\]
+ŷ = argmax Σ (w_i · P_i(y|x))
 
 ---
 
