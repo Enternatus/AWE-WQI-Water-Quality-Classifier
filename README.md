@@ -1,12 +1,12 @@
 # 💧 Water Quality Intelligence (WQI) Classifier
 
-A robust, leakage-aware machine learning pipeline for **multi-class water quality classification**, combining feature selection, imbalance handling, and a custom **Accuracy-Weighted Ensemble (AWE)** for high-fidelity environmental prediction.
+A robust, leakage-aware machine learning framework for **multi-class water quality classification**, integrating feature selection, class imbalance handling, and a novel **Accuracy-Weighted Ensemble (AWE)** for high-fidelity environmental prediction.
 
 ---
 
 ## 🚀 Overview
 
-This project implements an end-to-end supervised learning system that classifies water samples into **five standardized quality categories**:
+This project implements an end-to-end supervised learning system that classifies water samples into **five standardized quality categories** derived from the Water Quality Index (WQI):
 
 | Class       | WQI Range |
 |------------|----------|
@@ -16,180 +16,148 @@ This project implements an end-to-end supervised learning system that classifies
 | Poor       | 76 – 100 |
 | Very Poor  | > 100    |
 
-### 🔗 Core Components
-
+The system combines:
 - Statistical preprocessing  
 - Embedded feature selection  
-- Leakage-free resampling  
-- Stratified validation  
-- Ensemble learning  
+- Leakage-free resampling (SMOTE)  
+- Stratified cross-validation  
+- Multi-model ensemble learning  
 
 ---
 
-## ⚙️ Key Features
+## 🧠 Core Contribution: AWE-WQI Ensemble
 
-### 🧠 Intelligent Ensemble (AWE-WQI)
+The proposed **Adaptive Weighted Ensemble (AWE-WQI)** aggregates predictions from multiple classifiers using a performance-driven weighting scheme.
 
-Combines:
-- Random Forest  
-- Gradient Boosting  
-- AdaBoost  
-- XGBoost  
-
-**Weighting Strategy:**
-
-w_i = (F1_i^2) / (Σ F1_j^2)
+**Weighting:**
+w_i = (F1_i^2) / Σ(F1_j^2)
 
 **Final Prediction:**
-
 ŷ = argmax Σ (w_i · P_i(y|x))
 
----
 
-### ⚖️ Class Imbalance Handling
 
-- SMOTE applied **inside cross-validation pipelines**  
-- Prevents **data leakage**  
-- Maintains real-world class distribution  
+This approach amplifies high-performing models while suppressing weaker ones, improving robustness and generalization.
 
 ---
 
-### ✂️ Adaptive Feature Selection
+## ⚙️ Methodology Summary
 
-- Random Forest feature importance  
-- Median threshold pruning  
-- Reduces noise and improves generalization  
+The pipeline follows a structured sequence:
 
----
-
-### 🔁 Robust Validation Strategy
-
-- K-Fold Cross Validation (n = 5)  
-- Stratified K-Fold (n = 5)  
-- Ensures balanced class representation  
-
----
-
-### 🎯 Target Engineering
-
-- Converts continuous WQI → categorical labels  
-- Rule-based thresholds ensure **interpretability and domain alignment**
+1. Data preprocessing (mean imputation)
+2. WQI discretization into 5 classes
+3. Train-test split (stratified, 80/20)
+4. Feature selection (Random Forest, median threshold)
+5. Feature standardization (Z-score)
+6. SMOTE applied within cross-validation folds
+7. Model training:
+   - Random Forest  
+   - Gradient Boosting  
+   - AdaBoost  
+   - XGBoost  
+8. Hyperparameter tuning (Stratified K-Fold)
+9. AWE ensemble aggregation
+10. Evaluation using weighted metrics
 
 ---
 
-## 🏗️ System Architecture
-Raw Dataset (Results_MADE.csv)
-↓
-Missing Value Imputation (Mean)
-↓
-WQI → Class Mapping
-↓
-Train/Test Split (Stratified)
-↓
-Feature Selection (RF Median Threshold)
-↓
-Standardization (Z-score)
-↓
-Cross-Validation Pipelines
-├── SMOTE (inside folds)
-└── Model Training
-↓
-Hyperparameter Tuning (AdaBoost, XGBoost)
-↓
-Final Training with SMOTE
-↓
-AWE Ensemble Fusion
-↓
-Evaluation & Visualization
+## 📁 Project Structure
 
+AWE-WQI-Water-Quality-Classifier/
+│
+├── water_ml.py # Complete ML pipeline (training, validation, ensemble)
+├── Results_MADE.csv # Dataset (295 samples, 9 features + WQI)
+├── requirements.txt # Python dependencies
+├── README.md # Project documentation
+│
+├── data_preprocessing/ # Logical stage
+│ ├── Missing value imputation (mean)
+│ ├── WQI classification (5 classes)
+│ └── Label encoding
+│
+├── feature_engineering/ # Logical stage
+│ ├── Feature selection (Random Forest)
+│ └── Feature scaling (StandardScaler)
+│
+├── validation/ # Logical stage
+│ ├── K-Fold cross-validation
+│ └── Stratified K-Fold
+│
+├── imbalance_handling/ # Logical stage
+│ └── SMOTE (inside pipeline)
+│
+├── models/ # Logical stage
+│ ├── Random Forest
+│ ├── Gradient Boosting
+│ ├── AdaBoost
+│ └── XGBoost
+│
+├── tuning/ # Logical stage
+│ └── Hyperparameter tuning
+│
+└── ensemble/
+└── AWE-WQI (Accuracy Weighted Ensemble)
+
+## 📂 Code & Data
+
+This repository contains all components required for full reproducibility:
+
+- `water_ml.py` → Complete ML pipeline  
+- `Results_MADE.csv` → Dataset (295 samples, 9 features + WQI)  
 
 ---
 
-## 📦 Installation
+## ▶️ How to Run
+
+Install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/WQI-Classifier.git
-cd WQI-Classifier
 pip install -r requirements.txt
+
+Run the pipeline:
+
 python water_ml.py
 
-🧪 Dependencies
-Python ≥ 3.8
-numpy
-pandas
-scikit-learn
-xgboost
-imbalanced-learn
-matplotlib
-seaborn
-📊 Output & Evaluation
-✔ Quantitative Metrics
+The script performs:
+
+Model training
+Cross-validation
+Hyperparameter tuning
+Ensemble evaluation
+
+📊 Evaluation Metrics
+
+Models are evaluated using:
+
 Accuracy
 Precision (weighted)
 Recall (weighted)
 F1 Score (weighted)
-📈 Visual Diagnostics
-🔹 Confusion Matrix
-Class-wise prediction performance
-Identifies misclassification patterns
-🔹 ROC Curve (Multi-class)
-One-vs-rest binarization
-Evaluates class separability
-🔹 Feature Importance
-Global ranking of features
-Provides interpretability
-🧠 Model Stack
-Model	Role
+
+Stratified K-Fold is used to ensure balanced class representation during validation.
+
+🧪 Model Stack
+Model	Purpose
 Random Forest	Feature selection + baseline
-Gradient Boosting	Sequential error correction
-AdaBoost	Weak learner boosting
-XGBoost	Optimized gradient boosting
-⚙️ Hyperparameter Optimization
-Manual grid search (custom implementation)
-Evaluated using Stratified K-Fold
-Objective: maximize weighted F1-score
+Gradient Boosting	Residual learning
+AdaBoost	Adaptive reweighting
+XGBoost	Regularized boosting
+
 🔒 Reproducibility
-Global random_state = 42
-Deterministic splits, resampling, and training
-Ensures fully reproducible results
-⚠️ Implementation Notes
-Feature selection is performed before cross-validation
-→ introduces minor theoretical data leakage
-Preprocessing is not fully pipeline-wrapped
-→ can be improved for stricter ML compliance
-Ensemble uses tuned models only
-→ intentional design for performance-weighted fusion
-📁 Project Structure
-WQI-Classifier/
-│
-├── water_ml.py          # Main pipeline script
-├── Results_MADE.csv     # Dataset
-├── requirements.txt
-└── README.md
-📌 Future Improvements
-Full sklearn Pipeline integration (end-to-end)
-Nested cross-validation for hyperparameter tuning
-SHAP-based explainability
-Real-time prediction API
-Deployment (Flask / FastAPI)
-🧾 Citation
+Fixed random_state = 42
+Deterministic preprocessing and splitting
+SMOTE applied correctly within training folds
 
-If you use this work in research, cite as:
 
+📄 Research Paper
+
+The complete methodology, experimental results, and analysis are documented in the accompanying research paper.
+
+If you use this work, cite:
 Water Quality Intelligence Classifier using AWE Ensemble and Stratified Validation, 2026.
-🤝 Contributing
 
-Pull requests are welcome.
-For major changes, please open an issue first.
 
 📜 License
 
 MIT License
-
-🔥 Final Note
-
-This project is designed to balance:
-
-Practical machine learning performance
-Academic rigor
-Interpretability in environmental systems
